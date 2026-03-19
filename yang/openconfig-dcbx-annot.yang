@@ -1,0 +1,53 @@
+module openconfig-dcbx-annot {
+
+    yang-version "1.1";
+
+    namespace "http://openconfig.net/yang/annotation/openconfig-dcbx-annot";
+    prefix "oc-dcbx-annot";
+
+    import sonic-extensions { prefix sonic-ext; }
+
+    import openconfig-dcbx {prefix oc-dcbx; }
+
+    deviation /oc-dcbx:dcbx {
+        deviate add {
+            sonic-ext:key-transformer "dcbx_global_key_xfmr";
+            sonic-ext:table-name "DCBX";
+            sonic-ext:user-role-priv "rpc:netadmin";
+        }
+    }
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:config/oc-dcbx:enabled {
+        deviate add {
+            sonic-ext:field-name "enabled";
+        }
+    }
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:state/oc-dcbx:version {
+        deviate add {
+            sonic-ext:field-transformer "dcbx_config_version_xfmr";
+        }
+    }
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:interfaces {
+      deviate add {
+            sonic-ext:table-name "NONE";
+            sonic-ext:subtree-transformer "dcbx_interfaces_subtree_xfmr";
+            sonic-ext:path-transformer "dcbx_intf_path_xfmr";
+      }
+    }
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:interfaces/oc-dcbx:interface/oc-dcbx:pfc-tlv/oc-dcbx:local-pfc/oc-dcbx:config {
+        deviate not-supported;
+    }
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:interfaces/oc-dcbx:interface/oc-dcbx:ets-configuration-tlv/oc-dcbx:local-ets-configuration/oc-dcbx:config {
+        deviate not-supported;
+    }
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:interfaces/oc-dcbx:interface/oc-dcbx:state/oc-dcbx:statistics {
+        deviate add {
+            sonic-ext:subscribe-on-change "disable";
+        }
+    }
+}

@@ -1,0 +1,819 @@
+module openconfig-dcbx {
+
+    yang-version "1";
+
+    // namespace
+    namespace "http://openconfig.net/yang/dcbx/extension";
+
+    prefix "oc-dcbx";
+
+    import openconfig-interfaces { prefix oc-if; }
+    import openconfig-extensions { prefix oc-ext; }
+    import ietf-yang-types {prefix yang; }
+
+    // meta
+    organization
+        "OCP SONiC Subproject";
+
+    contact
+        "OCP SONiC Subproject Working Group https://github.com/Azure/SONiC";
+
+    description
+        "This module defines configuration and operational state data for DCBX.
+         DCBX: Data Center Bridging Capability Exchange
+         PFC: Prioity Flow Control
+         ETS: Enhanced Transmission Selection";
+
+    oc-ext:openconfig-version "0.1.0";
+
+    revision "2024-01-01" {
+        description
+            "Initial revision";
+        reference "0.1.0";
+    }
+
+    typedef config-version-options {
+        type enumeration {
+            enum "IEEE" {
+                value 1;
+                description
+                   "The version of DCBX that is defined within the IEEE 802.1Qaz standard";
+            }
+        }
+        description
+           "Supported DCBX version";
+   }
+
+   typedef oper-status-type {
+        type enumeration {
+            enum UP {
+                value 1;
+                description
+                    "Indicates successful transmitting, receiving and parsing valid DCBX TLVs.";
+            }
+
+            enum DOWN {
+                value 2;
+                description
+                   "Indicates that no DCBX TLV or malformed DCBX TLV is received or generated.";
+            }
+        }
+        description
+            "Type of operational status of DCBX";
+    }
+
+    typedef state-machine-types {
+        type enumeration {
+            enum ASYMMETRIC {
+                value 1;
+                description
+                    "Operational parameters for the DCB feature can be same as peer or not.";
+            }
+
+            enum SYMMETRIC {
+                value 2;
+                description
+                    "Operational parameters for the DCB feature will be same as peer.";
+            }
+        }
+
+        description
+            "State machine options";
+    }
+
+    grouping dcbx-config {
+        description
+            "Configuration of global DCBX parameters on the system.";
+
+        leaf enabled {
+            type boolean;
+            default false;
+            description
+                "Enable or disable DCBX globally on the system.";
+        }
+    }
+
+    grouping dcbx-state {
+        description
+            "This grouping defines the state of global DCBX on the system.";
+
+        leaf version {
+            type config-version-options;
+            default "IEEE";
+            description
+                "DCBX version. For SONiC, only IEEE 802.1Qaz is supported.";
+        }
+
+        uses dcbx-config;
+    }
+    
+    grouping dcbx-interface-config {
+        description
+          "This grouping defines the DCBX configuration data on the port.";
+
+        leaf name {
+            type leafref {
+                path "/oc-if:interfaces/oc-if:interface/oc-if:name";
+            }
+            description
+                "Name of the port.";
+        }
+
+        leaf enabled {
+            type boolean;
+            default true;
+            description
+                "Enable or disable DCBX on the port.";
+        }
+
+        leaf pfc-tlv-enabled {
+            type boolean;
+            default true;
+            description
+                "Determines whether the IEEE 802.1 organizationally defined Priority-based Flow Control
+                 TLV transmission is allowed on a given LLDP transmission capable port.";
+        }
+
+        leaf ets-configuration-tlv-enabled {
+            type boolean;
+            default true;
+            description
+                "Determines whether the IEEE 802.1 organizationally defined ETS Configuration TLV transmission
+                 is allowed on a given LLDP transmission capable port.";
+        }
+
+        leaf ets-recommendation-tlv-enabled {
+            type boolean;
+            default true;
+            description
+                "Determines whether the IEEE 802.1 organizationally defined ETS Recommendation TLV transmission
+                 is allowed on a given LLDP transmission capable port.";
+        }
+    }
+
+    grouping pfc-tlvs-statistics {
+        description
+            "This grouping defines the statistics for the PFC TLV on the port.";
+
+        leaf pfc-tlvs-transmitted {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of PFC TLVs that are transmitted from this port.
+                 This counter will be incremented every time when there is PFC TLV generated and transmitted to the LLDP.";
+        }
+
+        leaf pfc-tlvs-received {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of PFC TLVs that are received in this port.
+                 This counter will be incremented every time when there is PFC TLV received from the LLDP.";
+        }
+
+        leaf pfc-tlvs-transmitted-error {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of malformed PFC TLVs transmitted from this port.
+                 This counter will be incremented every time a PFC TLV is dropped in the transmit process.";
+        }
+
+        leaf pfc-tlvs-received-error {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of malformed PFC TLVs received in this port.
+                 This counter will be incremented every time a received PFC TLV is dropped.";
+        }
+
+        leaf pfc-tlv-last-transmitted {
+            type uint64;
+            units "seconds";
+            description
+              "This value indicates the number of seconds elapsed since the last valid PFC TLV was transmitted from this port.";
+        }
+
+        leaf pfc-tlv-last-received {
+            type uint64;
+            units "seconds";
+            description
+              "This value indicates the number of seconds elapsed since the last valid PFC TLV was received in this port.";
+        }
+    }
+
+    grouping ets-configuration-tlvs-statistics {
+        description
+            "This grouping defines the statistics for the ETS configuration TLV on the port.";
+
+        leaf ets-configuration-tlvs-transmitted {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of ETS configuration TLVs that are transmitted from this port.
+                 This counter will be incremented every time when there is ETS configuration TLV generated and transmitted to the LLDP.";
+        }
+
+        leaf ets-configuration-tlvs-received {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of ETS configuration TLVs that are received in this port.
+                 This counter will be incremented every time when there is ETS configuration TLV received from the LLDP.";
+        }
+
+        leaf ets-configuration-tlvs-transmitted-error {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of malformed ETS configuration TLVs transmitted from this port.
+                 This counter will be incremented every time an ETS configuration TLV is dropped in the transmit process.";
+        }
+
+        leaf ets-configuration-tlvs-received-error {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of malformed ETS configuration TLVs received in this port.
+                 This counter will be incremented every time a received ETS configuration TLV is dropped.";
+        }
+
+        leaf ets-configuration-tlv-last-transmitted {
+            type uint64;
+            units "seconds";
+            description
+              "This value indicates the number of seconds elapsed since the last valid ETS configuration TLV was transmitted from this port.";
+        }
+
+        leaf ets-configuration-tlv-last-received {
+            type uint64;
+            units "seconds";
+            description
+              "This value indicates the number of seconds elapsed since the last valid ETS configuration TLV was received in this port.";
+        }
+    }
+  
+     grouping ets-recommendation-tlvs-statistics {
+        description
+            "This grouping defines the statistics for the ETS recommendation TLV on the port.";
+
+        leaf ets-recommendation-tlvs-transmitted {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of ETS recommendation TLVs that are transmitted from this port.
+                 This counter will be incremented every time when there is ETS recommendation TLV generated and transmitted to the LLDP.";
+        }
+
+        leaf ets-recommendation-tlvs-received {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of ETS recommendation TLVs that are received in this port.
+                 This counter will be incremented every time when there is ETS recommendation TLV received from the LLDP.";
+        }
+
+        leaf ets-recommendation-tlvs-transmitted-error {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of malformed ETS recommendation TLVs transmitted from this port.
+                 This counter will be incremented every time an ETS recommendation TLV is dropped in the transmit process.";
+        }
+
+        leaf ets-recommendation-tlvs-received-error {
+            type yang:counter64;
+            description
+                "This object is used to keep track of the number of malformed ETS recommendation TLVs received in this port.
+                 This counter will be incremented every time a received ETS recommendation TLV is dropped";
+        }
+
+        leaf ets-recommendation-tlv-last-transmitted {
+            type uint64;
+            units "seconds";
+            description
+              "This value indicates the number of seconds elapsed since the last valid ETS recommendation TLV was transmitted from this port.";
+        }
+
+        leaf ets-recommendation-tlv-last-received {
+            type uint64;
+            units "seconds";
+            description
+              "This value indicates the number of seconds elapsed since the last valid ETS recommendation TLV was received in this port.";
+        }
+    }
+        
+    grouping pfc-priority-vector {
+        description
+        "This grouping defines PFC to priority assignment in the PFC TLV.";
+
+        list priority-vector {
+            description
+               "List of priorities within the PFC TLV.
+                Each entry represents a priority and an indication of whether lossless is enabled for that priority.";
+
+            config false;
+
+            key "priority";
+            leaf priority {
+               type leafref {
+                  path "../state/priority";
+               }
+               description
+                  "Prioity for which PFC is enabled or disabled.";
+            }
+
+            container state {
+                description
+                   "Operational state data for PFC to priority assignment in the PFC TLV.";
+                config false;
+
+                leaf priority {
+                    type uint8 {
+                        range "0..7";
+                    } 
+                    description
+                        "Prioity for which PFC is enabled or  disabled";
+                }
+
+                leaf lossless {
+                    type boolean;
+                    description
+                        "Indicates if PFC is enabled on the corresponding priority.";
+                }
+            }           
+        }
+    }
+
+    grouping ets-conf-tlv-config-info {
+        description
+            "This grouping defines the user configured data in the ETS configuration TLV.";
+
+        leaf willing {
+            type boolean;
+            description 
+                "Indicates if the local system is willing to accept the ETS configuration recommended by the remote system.";
+        }
+    }
+
+    grouping ets-conf-tlv-common-info {
+        description
+            "This grouping defines the data specific to ETS configuration TLV.";
+
+        container state {
+            description
+                "Operational state data for the ETS configuration TLV.";
+            config false;
+
+            uses ets-conf-tlv-config-info;
+
+            leaf credit-based-shaper-supported {
+                type boolean;
+                description
+                    "Indicates if the credit-based shaper Traffic Selection Algorithm is supported on the system.";
+            }
+
+            leaf max-traffic-classes-supported {
+                type uint8 {
+                    range "1..8";
+                }
+                description
+                    "Maximum number of traffic classes supported.";
+            }
+        }
+    }
+
+    grouping ets-tlv-common-info {
+        description
+            "This grouping defines data that are common to ETS configuration TLV and ETS recommendation TLV.";
+
+        container ets-prio-tc-assigns {
+            description
+              "Priority to traffic class assignment.";
+
+            config false;
+
+            list ets-prio-tc-assign {
+                description
+                    "Indicates a priority to traffic class assignment.";
+
+                config false;
+
+                key "priority";
+
+                leaf priority {
+                    type leafref {
+                        path "../state/priority";
+                    }
+                    description
+                        "Indicates the priority that is assigned to a traffic class.";
+                }
+
+                container state {
+                    description
+                        "Operational state data for the ETS TLV priority to traffic class assignment.";
+
+                    config false;
+
+                    leaf priority {
+                        type uint8 {
+                            range "0..7";
+                        }
+                        description
+                            "Indicates the priority that is assigned to a traffic class.";
+                    }
+
+                    leaf traffic-class {
+                        type uint8 {
+                            range "0..15";
+                        } 
+                        description
+                            "Indicates the traffic class to which this priority is to be assigned.";
+                    }
+                }        
+            }
+        }
+
+        container tc-bandwidth-assigns {
+            description
+                "Traffic class to bandwidth assignment.";
+
+            config false;
+
+            list tc-bandwidth-assign {
+                description
+                    "Indicates a traffic class to bandwidth assignment.";
+
+                config false;
+
+                key "tc";
+
+                leaf tc {
+                    type leafref {
+                        path "../state/tc";
+                    }
+                    description
+                        "Indicates the traffic class to which this bandwidth applies.";
+                }
+
+                container state {
+                    description
+                        "Operational state data for the ETS TLV traffic class to bandwidth assignment.";
+
+                    config false;
+
+                    leaf tc {
+                        type uint8 {
+                            range "0..15";
+                        }
+                        description
+                            "Indicates the traffic class to which this bandwidth applies.";
+                    }
+
+                    leaf bandwidth {
+                        type uint8 {
+                            range "0..100";
+                        } 
+                        description
+                            "Indicates the bandwidth assigned to this traffic class.";
+                    }
+                }
+            }
+        }
+
+        container traffic-sel-algos {
+            description
+                "Traffic class to traffic selection algorithm assignment.";
+
+             config false;
+
+             list traffic-sel-algo {
+                description
+                    "Indicates traffic class to traffic selection algorithm assignment.";
+
+                config false;
+
+                key "tc";
+
+                leaf tc {
+                    type leafref {
+                        path "../state/tc";
+                    }
+                    description
+                        "Indicates the traffic class that is assigned to a traffic selection algorithm.";
+                }
+
+                container state {
+                    description
+                        "Operational state data for the traffic class to traffic selection algorithm assignment.";
+
+                    config false;
+
+                    leaf tc {
+                        type uint8 {
+                            range "0..15";
+                        }
+                        description
+                            "Indicates the traffic class that is assigned to a traffic selection algorithm.";
+                    }
+
+                    leaf tsa {
+                        type uint8;
+                        description
+                            "Indicates the traffic selection algorithm to which this traffic class is to be assigned.
+                             0: Strict Priority
+                             1: Credit-based shaper
+                             2: Enhanced transmission selection
+                             3-254: Reserved for future standardization
+                             252: Vendor specific
+                            ";
+                    }
+                }
+            }
+        }
+    }
+
+    grouping pfc-tlv-config-info {
+        description
+            "This grouping defines the user configured data in the PFC TLV.";
+
+        leaf willing {
+            type boolean;
+            description
+                "Indicates if the local system is willing to accept the PFC configuration of the remote system.";
+        }
+    }
+
+    grouping pfc-tlv-common-info {
+        description
+            "This grouping defines the data in PFC TLV.";
+
+        uses pfc-tlv-config-info;
+
+        leaf macsec-bypass-capability {
+            type boolean;
+            description
+                "Indicates if the local system is capable of bypassing MACsec processing when MACsec is disabled.";
+        }
+
+        leaf pfc-capability {
+            type uint8 {
+                range "1..8";
+            }
+            description
+                "Indicates the number of traffic classes on the local device that may simultaneously have PFC enabled.";
+        }
+    }
+
+    grouping dcbx-interface-oper-status {
+        description
+            "This grouping defines the the overall DCBX operational status data on the port.";
+        
+        leaf dcbx-oper-status {
+            type oper-status-type;
+             description
+                 "DCBX operational status.";
+        }
+
+        leaf dcbx-down-reason {
+            type string;
+            description
+                "Reason for DCBX operational status down.";
+        }
+
+        leaf pfc-oper-status {
+            type oper-status-type;
+            description
+                "DCBX PFC operational status.";
+        }
+
+        leaf pfc-down-reason {
+            type string;
+            description
+                "Reason for DCBX PFC operational status down.";
+        }
+
+        leaf pfc-state-machine-type {
+            type state-machine-types;
+            default "SYMMETRIC";
+            description
+               "PFC state machine type.";
+        }
+
+        leaf ets-oper-status {
+            type oper-status-type;
+            description
+                "DCBX ETS operational status.";
+        }
+
+        leaf ets-down-reason {
+            type string;
+            description
+                "Reason for DCBX ETS operational status down.";
+        }
+
+        leaf ets-state-machine-type {
+            type state-machine-types;
+            default "ASYMMETRIC";
+            description
+                "ETS state machine type.";
+        }
+    }
+
+    grouping dcbx-interface-statistics {
+        description
+            "This grouping defines statistics for PFC TLV, ETS configuration TLV and ETS recommendation TLV on the port.";
+
+        container statistics {
+            description
+              "Statistics for PFC TLV, ETS configuration TLV and ETS recommendation TLV on the port.";
+
+            uses pfc-tlvs-statistics;
+
+            uses ets-configuration-tlvs-statistics;
+
+            uses ets-recommendation-tlvs-statistics;
+        }
+    }
+
+    grouping dcbx-interface-tlvs {
+        description
+          "This grouping defines PFC TLV, ETS configuration TLV and ETS recommendation TLV operational state data on the port.";
+
+        container pfc-tlv {
+            description
+                "Data in the PFC TLV.";
+
+            config true;
+
+            container local-pfc {
+                description
+                    "Data in the local PFC TLV.";
+               
+               container config {
+                   description
+                       "User configured data in the local PFC TLV.";
+                   uses pfc-tlv-config-info;
+               }
+
+               container state {
+                   description
+                       "Operational state data in the local PFC TLV.";
+                   config false;
+
+                   uses pfc-tlv-common-info;
+               }
+
+               container priority-vectors {
+                   description
+                       "Priority lossless assignment in the local PFC TLV.";
+                   config false;
+
+                   uses pfc-priority-vector;
+               }
+            }
+
+            container remote-pfc {
+                description
+                    "Data in the remote PFC TLV.";
+                config false;
+
+                container state {
+                    description
+                        "Operational state data in the remote PFC TLV.";
+
+                    uses pfc-tlv-common-info;
+                }
+
+                container priority-vectors {
+                    description
+                        "Priority lossless assignment in the remote PFC TLV.";
+
+                    uses pfc-priority-vector;
+                }
+            }
+        }
+
+        container ets-configuration-tlv {
+            description
+                "Data in the ETS configuration TLV.";
+
+            container local-ets-configuration {
+                description
+                    "Data in the local ETS configuration TLV.";
+
+                container config {
+                    description
+                        "User configured data in the local ETS TLV.";
+                    uses ets-conf-tlv-config-info;
+                }
+
+                uses ets-conf-tlv-common-info;
+                uses ets-tlv-common-info;
+            }
+
+            container remote-ets-configuration {
+                description
+                    "Data in the remote ETS configuration TLV.";
+                config false;
+
+                uses ets-conf-tlv-common-info;
+                uses ets-tlv-common-info;
+            }
+
+        }
+
+        container ets-recommendation-tlv {
+            description
+                "Data in the ETS recommendation TLV.";
+
+            config false;
+
+            container local-ets-recommendation {
+                description
+                    "Data in the local ETS recommendation TLV.";
+
+                uses ets-tlv-common-info;
+            }
+
+            container remote-ets-recommendation {
+                description
+                    "Data in the remote ETS recommendation TLV";
+
+                uses ets-tlv-common-info;
+            }
+        }
+    }
+ 
+    grouping dcbx-interface-top {
+        description
+            "Top level grouping for DCBX data on the port.";
+
+        container interfaces {
+            description
+                "DCBX data that can be configured on the port.";
+
+            list interface {
+                key "name";
+                description
+                    "List of ports on which DCBX is configured.";
+
+                leaf name {
+                    type leafref {
+                        path "../config/name";
+                    }
+                    description
+                        "Name of port on which DCBX is configured.";
+                }
+
+                container config {
+                    description
+                        "Configuration data for DCBX on the port.";
+
+                    uses dcbx-interface-config;
+                }
+
+                container state {
+                    config false;
+ 
+                    description
+                        "Operational state data of DCBX on the port."; 
+
+                    uses dcbx-interface-config;
+                    uses dcbx-interface-oper-status;
+                    uses dcbx-interface-statistics;
+                }
+
+                uses dcbx-interface-tlvs;
+            }
+        }
+    }
+
+    grouping dcbx-top {
+        description
+            "Top-level grouping for DCBX model";
+      
+        container dcbx {
+            description 
+                "Top-level container for DCBX configuration and operational state data.";
+
+             container config {
+                 description
+                     "Configuration data";
+                 
+                  uses dcbx-config;       
+             }
+           
+             container state {
+                 config false;
+              
+                 description
+                     "Operational state data";
+
+                 uses dcbx-state;     
+             }
+
+             uses dcbx-interface-top;
+        }
+    }
+
+    uses dcbx-top;
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:interfaces/oc-dcbx:interface/oc-dcbx:pfc-tlv/oc-dcbx:local-pfc/oc-dcbx:config/oc-dcbx:willing {
+                        deviate not-supported;
+    }
+
+    deviation /oc-dcbx:dcbx/oc-dcbx:interfaces/oc-dcbx:interface/oc-dcbx:ets-configuration-tlv/oc-dcbx:local-ets-configuration/oc-dcbx:config/oc-dcbx:willing {
+                        deviate not-supported;
+    }
+
+}
