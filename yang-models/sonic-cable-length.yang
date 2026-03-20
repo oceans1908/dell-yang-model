@@ -2,23 +2,13 @@ module sonic-cable-length {
 
     yang-version 1.1;
 
-    namespace  "http://github.com/Azure/sonic-cable-length";
+    namespace  "http://github.com/sonic-net/sonic-cable-length";
 
     prefix cable-length;
 
     import sonic-port {
-        prefix prt;
+        prefix port;
     }
-
-	import sonic-extension {
-		prefix sonic-ext;
-	}
-    
-	organization
-		"SONiC";
-
-	contact
-		"SONiC";
 
     description "CABLE_LENGTH YANG module for SONiC OS";
 
@@ -33,8 +23,6 @@ module sonic-cable-length {
 
             list CABLE_LENGTH_LIST {
                 key "name";
-                sonic-ext:custom-validation ValidateBufferConfigsInitilized;
-                sonic-ext:custom-validation ValidateModifyOnlyAttr;
 
                 leaf name {
                     type string {
@@ -54,13 +42,13 @@ module sonic-cable-length {
 
                     leaf port {
                         type leafref {
-	                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path /port:sonic-port/port:PORT/port:PORT_LIST/port:name;
                         }
                     }
 
                     leaf length {
                         type string {
-                            pattern '5m|40m|300m' {
+                            pattern '[0-9]+m' {
                                 error-message "Invalid cable length.";
                                 error-app-tag cable-length-invalid-length;
                             }
