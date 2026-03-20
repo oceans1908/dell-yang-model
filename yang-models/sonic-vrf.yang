@@ -1,9 +1,9 @@
 module sonic-vrf {
-    namespace "http://github.com/Azure/sonic-vrf";
+    namespace "http://github.com/sonic-net/sonic-vrf";
     prefix vrf;
-    
-    import sonic-extension {
-        prefix sonic-ext;
+
+    import sonic-types {
+        prefix stypes;
     }
 
     organization
@@ -14,59 +14,44 @@ module sonic-vrf {
 
     description
         "SONIC VRF";
-	
-    revision 2024-11-25 {
-		description
-			"Add prevention of deleting default VRF";
-	}
 
-	revision 2019-11-22 {
-		description
-			"Add VRF name check";
-	}
-
-    revision 2019-10-30 {
+    revision 2021-03-30 {
         description
             "Initial revision.";
     }
 
     container sonic-vrf {
         container VRF {
-            description "Vrf configuration.";         
+            description "Vrf configuration.";
 
             list VRF_LIST {
-                key "vrf_name";
-                sonic-ext:custom-validation CheckDeleteDefaultVrf;
+                key "name";
 
-                leaf vrf_name {
-                    type string {
-                        length "4..15";
+                leaf name {
+                    type stypes:interface_name {
                         pattern "Vrf[a-zA-Z0-9_-]+" {
                             error-message "Invalid VRF name";
                             error-app-tag vrf-name-invalid;
                         }
                     }
-                }   
+                }
 
                 leaf fallback {
                     type  boolean;
                     default false;
                     description
-                        "Enalbe/disable fallback feature which is useful for specified VRF user to access internet through global/main route.";
+                        "Enable/disable fallback feature which is useful for specified VRF user to access internet through global/main route.";
                 }
 
                 leaf vni {
-		    sonic-ext:custom-validation ValidateVrfVNI;
                     type uint32 {
-                        range "0..16777215" {
-                            error-message "VNI ID out of range";
-                            error-app-tag vnid-invalid;
-                        }
+                        range "0..16777215";
                     }
+                    default 0;
                     description
                         "VNI mapped to VRF";
                 }
-            }
-        }
-    }
-}
+            } /* end of list VRF_LISt */
+        } /* end of container VRf */
+    } /* end of container sonic-vrf */
+}/* end of module sonic-vrf */

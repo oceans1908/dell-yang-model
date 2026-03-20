@@ -1,57 +1,67 @@
 module sonic-dscp-tc-map {
-	namespace "http://github.com/Azure/sonic-dscp-tc-map";
-	prefix dtm;
 
-	organization
-		"SONiC";
+    yang-version 1.1;
 
-	contact
-		"SONiC";
+    namespace "http://github.com/sonic-net/sonic-dscp-tc-map";
 
-	description
-		"SONIC DSCP_TO_TC_MAP";
+    prefix dtm;
 
-	revision 2019-05-15 {
-		description
-			"Initial revision.";
-	}
+    import sonic-types {
+        prefix stypes;
+    }
 
-	container sonic-dscp-tc-map {	
+    organization
+        "SONiC";
 
-		container DSCP_TO_TC_MAP {
+    contact
+        "SONiC";
 
-			list DSCP_TO_TC_MAP_LIST {
-				key "name";
+    description
+        "DSCP_TO_TC_MAP yang Module for SONiC OS";
 
-				leaf name {
-        				type string {
-                        		pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,31})';
-                        		length 1..32;
-                			}
-				}
+    revision 2021-04-15 {
+        description
+            "Initial revision.";
+    }
 
-				list DSCP_TO_TC_MAP { //this is list inside list for storing mapping between two fields
-					key "dscp";
+    container sonic-dscp-tc-map {
 
-					leaf dscp {
-						type string {
-							pattern "([0-9]|[1-5][0-9]|6[0-3])?" {
-								error-message "Invalid DSCP priority";
-								error-app-tag dscp-invalid;
-							}
-						}
-					}
-					leaf tc_num {
-						type string {
-							pattern "[0-7]?"{
-								error-message "Invalid Traffic Class number";
-								error-app-tag tc-num-invalid;
-							}
-						}
-					}
-				}
+        container DSCP_TO_TC_MAP {
 
-			}
-		}
-	}
+            description "DSCP_TO_TC_MAP part of config_db.json";
+
+            list DSCP_TO_TC_MAP_LIST {
+
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,31})';
+                        length 1..32 {
+                            error-message "Invalid length for map name.";
+                            error-app-tag map-name-invalid-length;
+                        }
+                    }
+                }
+
+                list DSCP_TO_TC_MAP { //this is list inside list for storing mapping between two fields
+
+                    key "dscp";
+
+                    leaf dscp {
+                        type string {
+                            pattern "6[0-3]|[1-5][0-9]?|[0-9]?" {
+                                error-message "Invalid DSCP";
+                                error-app-tag dscp-invalid;
+                            }
+                        }
+                    }
+
+                    leaf tc {
+                        type stypes:tc_type;
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,5 +1,5 @@
 module sonic-system-radius {
-    namespace "http://github.com/Azure/sonic-system-radius";
+    namespace "http://github.com/sonic-net/sonic-system-radius";
     prefix ssys;
     yang-version 1.1;
 
@@ -7,118 +7,62 @@ module sonic-system-radius {
         prefix inet;
     }
 
-    import sonic-extension {
-        prefix sonic-ext;
-    }
-
     import sonic-port {
-        prefix prt;
+        prefix port;
     }
 
     import sonic-portchannel {
-        prefix spc;
+        prefix lag;
     }
 
-    import sonic-vlan {
-        prefix svlan;
+// Comment sonic-vlan import here until libyang back-links issue is resolved for VLAN leaf reference.
+//    import sonic-vlan {
+//        prefix vlan;
+//    }
+
+    import sonic-loopback-interface {
+        prefix loopback;
     }
 
-    import sonic-loopback {
-        prefix lo;
+    import sonic-mgmt_port {
+        prefix mgmt-port;
     }
-
-    import sonic-mgmt-port {
-        prefix smt;
-    }
-
-    import sonic-interface {
-        prefix subif;
-    }
-
-    import sonic-vrf {
-        prefix vrf;
-    }
-
-    import sonic-pki {
-        prefix spki;
-    }
-
-    organization
-        "SONiC";
-
-    contact
-        "SONiC";
 
     description
         "SONiC RADIUS";
 
-    revision 2024-09-10 {
-        description "Add RADIUS over TLS attributes.";
+    revision 2022-11-11 {
+        description "Initial revision.";
     }
 
-    revision 2020-08-28 {
-        description "RADIUS vrf syntax.";
-    }
-
-    revision 2020-07-26 {
-        description "Change for sonic-loopback.yang.";
-    }
-
-    revision 2020-06-30 {
-        description "RADIUS source-interface.";
-    }
-
-    revision 2020-05-24 {
-        description "RADIUS statistics.";
-    }
-
-    revision 2020-05-02 {
-        description "Allowed domain name as well for server configuration.";
-    }
-
-    revision 2020-03-30 {
-        description "NAS-IP|IPV4-Address attribute.";
-    }
-
-    revision 2020-02-17 {
-        description "Allow special characters in passkey.";
-    }
-
-    revision 2019-11-14 {
-        description
-            "Initial revision.";
+    typedef auth_type_enumeration {
+        type enumeration {
+            enum pap;
+            enum chap;
+            enum mschapv2;
+        }
     }
 
     container sonic-system-radius {
 
         container RADIUS {
 
-            list RADIUS_LIST {
-
-                key "global_key";
-
-                leaf global_key {
-                    type enumeration {
-                        enum global;
-                    }
-                    description
-                            "RADIUS global key";
-                }
+            container global {
 
                 leaf passkey {
-                    sonic-ext:custom-validation ValidateEncryptedKey;
-                    type string;
+                    type string {
+                        length "1..65";
+                        pattern "[^ #,]*" {
+                            error-message 'RADIUS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
                     description
-                            'RADIUS global shared secret';
+                            'RADIUS global shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
                 }
 
                 leaf auth_type {
                     default "pap";
-                    type enumeration {
-                        enum pap;
-                        enum chap;
-                        enum mschapv2;
-                    }
+                    type auth_type_enumeration;
                     description
                             "RADIUS global method used for authenticating the comm. mesg.";
                 }
@@ -170,7 +114,6 @@ module sonic-system-radius {
 
                 leaf ipaddress {
                     type inet:host;
-                    sonic-ext:custom-validation ValidateIPAddressOrHostname;
                     description
                         "RADIUS server's Domain name or IP address (IPv4 or IPv6)";
                 }
@@ -178,22 +121,24 @@ module sonic-system-radius {
                 leaf auth_port {
                     default 1812;
                     type inet:port-number;
+                    description
+                        "RADIUS authentication port number.";
                 }
 
                 leaf passkey {
-                    sonic-ext:custom-validation ValidateEncryptedKey;
-                    type string;
+                    type string {
+                        length "1..65";
+                        pattern "[^ #,]*" {
+                            error-message 'RADIUS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
                     description
-                            'RADIUS servers shared secret';
+                            'RADIUS servers shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
                 }
 
                 leaf auth_type {
                     default "pap";
-                    type enumeration {
-                        enum pap;
-                        enum chap;
-                        enum mschapv2;
-                    }
+                    type auth_type_enumeration;
                     description
                             "RADIUS server's method used for authenticating the comm. mesg.";
                 }
@@ -227,121 +172,38 @@ module sonic-system-radius {
                 }
 
                 leaf vrf {
-                    type union {
-                        type enumeration{
-                            enum mgmt;
+                    type string {
+                        pattern "mgmt|default" {
+                            error-message "Error: Invalid VRF name";
                         }
-                        type leafref {
-                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
-                       }
                     }
                     description
-                            "RADIUS server's VRF";
+                        "VRF name";
+
                 }
 
                 leaf src_intf {
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/port:sonic-port/port:PORT/port:PORT_LIST/port:name";
                         }
                         type leafref {
-                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                            path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
+                        }
+                        type string {
+                            pattern 'Vlan([0-9]{1,3}|[1-3][0-9]{3}|[4][0][0-8][0-9]|[4][0][9][0-4])';
+                        }
+
+                        type leafref {
+                            path "/loopback:sonic-loopback-interface/loopback:LOOPBACK_INTERFACE/loopback:LOOPBACK_INTERFACE_LIST/loopback:name";
                         }
                         type leafref {
-                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
-                        }
-                        type leafref {
-                            path "/lo:sonic-loopback/lo:LOOPBACK/lo:LOOPBACK_LIST/lo:name";
-                        }
-                        type leafref {
-                            path "/smt:sonic-mgmt-port/smt:MGMT_PORT/smt:MGMT_PORT_LIST/smt:ifname";
-                        }
-                        type leafref {
-                            path "/subif:sonic-interface/subif:VLAN_SUB_INTERFACE/subif:VLAN_SUB_INTERFACE_LIST/subif:id";
+                            path "/mgmt-port:sonic-mgmt_port/mgmt-port:MGMT_PORT/mgmt-port:MGMT_PORT_LIST/mgmt-port:name";
                         }
                     }
-                }
-
-                leaf protocol {
-                    type enumeration {
-                        enum UDP;
-                        enum TLS;
-                    }
-                    default UDP;
-                    description
-                        "Radius server protocol";
-                }
-
-                leaf security_profile {
-                    type leafref {
-                        path "/spki:sonic-pki/spki:SECURITY_PROFILES/spki:SECURITY_PROFILES_LIST/spki:profile-name";
-                    }
-                    must "current()/../protocol = 'TLS'" {
-                        error-message "Security profile can only be configured for TLS protocol. Default protocol is UDP";
-                    }
-                    sonic-ext:custom-validation ValidateProtocolType;
-                    sonic-ext:custom-validation ValidateSecurityProfile;
-                    sonic-ext:custom-validation ValidateCertificatePresence;
-                    description
-                        "Name of the security profile associated";
-                }
-            }
-        }
-
-        container RADIUS_SERVER_STATS {
-            sonic-ext:db-name "COUNTERS_DB";
-            sonic-ext:key-delim ":";
-
-            config false;
-            description "Counters DB RADIUS server statistics";
-
-            list RADIUS_SERVER_STATS_LIST {
-                key "ipaddress";
-
-                max-elements 8;
-
-                leaf ipaddress {
-                    type inet:host;
-                    description
-                        "RADIUS server's Domain name or IP address (IPv4 or IPv6)";
-                }
-
-                leaf access_requests {
-                    type uint64;
-                    description "Sent Access Requests";
-                }
-
-                leaf access_accepts {
-                    type uint64;
-                    description "Received Access Accepts";
-                }
-
-                leaf access_rejects {
-                    type uint64;
-                    description "Received Access Rejects";
-                }
-
-                leaf access_challenges {
-                    type uint64;
-                    description "Received Access Challenges";
-                }
-
-                leaf retried_access_requests {
-                    type uint64;
-                    description "Retried Access Requests";
-                }
-
-                leaf bad_authenticators {
-                    type uint64;
-                    description "Bad Authenticators";
-                }
-
-                leaf invalid_packets {
-                    type uint64;
-                    description "Invalid Packets";
+                    description "Source interface to use for RADIUS server communication.";
                 }
             }
         }
     }
 }
-

@@ -1,411 +1,223 @@
 module sonic-portchannel {
-    namespace "http://github.com/Azure/sonic-portchannel";
-    prefix spc;
 
-    import sonic-common {
-        prefix scommon;
-    }
+    yang-version 1.1;
 
-    import sonic-extension {
-        prefix sonic-ext;
-    }
+    namespace "http://github.com/sonic-net/sonic-portchannel";
+    prefix lag;
 
-    import sonic-port {
-        prefix prt;
+    import sonic-types {
+        prefix stypes;
     }
 
     import ietf-yang-types {
         prefix yang;
     }
 
-    organization
-        "SONiC";
-
-    contact
-        "SONiC";
-
-    description
-        "SONIC PORTCHANNEL";
-
-    revision 2023-01-10 {
-        description
-            "Add custom validation for Portchannel member.";
+    import sonic-port {
+        prefix port;
+        revision-date 2019-07-01;
     }
 
-    revision 2022-12-22 {
-        description
-            "Add custom validation for Lag Mode";
+    import sonic-vrf {
+        prefix vrf;
     }
 
-    revision 2022-06-17 {
-        description
-            "Add system_mac leaf";
+    description "PORTCHANNEL yang Module for SONiC OS";
+
+    revision 2021-06-13 {
+        description "Change min-links valid range from 1-128 to 1-1024";
     }
 
-    revision 2021-11-09 {
-        description
-            "Add description leaf in lag table container.";
+    revision 2021-03-31 {
+        description "Add PortChannel Interface List with VRF attribute";
     }
 
-    revision 2020-07-30 {
-        description
-            "Add Portchannel description.";
+    revision 2021-03-15 {
+        description "Add SONiC PortChannel Interface model";
     }
 
-    revision 2019-05-15 {
-        description
-            "Initial revision.";
-    }
-
-    typedef mode {
-        type enumeration {
-            enum enable;
-            enum disable;
-        }
+    revision 2019-07-01 {
+        description "First Revision";
     }
 
     container sonic-portchannel {
 
-        container PORTCHANNEL_GLOBAL {
-
-            list PORTCHANNEL_GLOBAL_LIST {
-                key "keyleaf";
-
-                leaf keyleaf {
-                    type enumeration {
-                        enum GLOBAL;
-                    }
-                    description
-                        "Key node identifier. It's value is always GLOBAL";
-                }
-
-                leaf graceful_shutdown_mode {
-                    type enumeration {
-                        enum ENABLE;
-                        enum DISABLE;
-                    }
-                    description
-                        "Enable/Disable portchannel graceful shutdown mode";
-                }
-            }
-        }
-        container EVPN_ETHERNET_SEGMENT {
-            list EVPN_ETHERNET_SEGMENT_LIST {
-                key "name";
-                sonic-ext:custom-validation ValidateEvpnEthSegCreationDeletion;
-                sonic-ext:custom-validation ValidateL2VniCapabilityEnabled;
-
-                leaf name {
-                    type string;
-                    description
-                        "Ethernet Segment name";
-                }
-                leaf ifname {
-                    mandatory true;
-                    type leafref {
-                        path "../../../PORTCHANNEL/PORTCHANNEL_LIST/name";
-                    }
-                    description
-                        "PortChannel interface name";
-                }
-                leaf esi_type {
-                    type enumeration {
-                        enum TYPE_0_OPERATOR_CONFIGURED;
-                        enum TYPE_1_LACP_BASED;
-                        enum TYPE_3_MAC_BASED;
-                    }
-                    description
-                        "ESI Type";
-                }
-                leaf esi {
-                    type string { 
-                        pattern "(([0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){9})|AUTO)" {
-                            error-message "Invalid ESI pattern";
-                            error-app-tag esi-value-invalid;
-                        }
-                    }
-                    description
-                        "portChannel identifier";
-                }
-                leaf df_pref {
-                    type uint16 {
-                        range "1..65535" {
-                            error-message "Invalid df_pref value";
-                        }
-                    }
-                    description
-                        "Designated-Forwarder election preference for this router in (1..65535) range";
-                }
-            }
-        }
-
         container PORTCHANNEL {
 
+            description "PORTCHANNEL part of config_db.json";
+
             list PORTCHANNEL_LIST {
+
                 key "name";
-                sonic-ext:custom-validation ValidatePortChannelCreationDeletion;
-                sonic-ext:custom-validation ValidateSwitchPortConfig;
-                sonic-ext:custom-validation ValidateL3ConfigExists;
-                sonic-ext:custom-validation ValidateL2ConfigExists;
 
                 leaf name {
                     type string {
-                        pattern "PortChannel([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-6])" {
-                            error-message "Invalid PortChannel name pattern";
-                            error-app-tag portchannel-name-invalid;
-                        }
+                        pattern 'PortChannel[0-9]{1,4}';
                     }
-                }
-
-                leaf admin_status {
-                    type scommon:admin-status;
-                    default up;
-                }
-
-                leaf mtu {
-                    type uint32 {
-                        range "1312..9216" {
-                            error-message "Invalid MTU value";
-                            error-app-tag mtu-invalid;
-                        }
-                    }
-                    sonic-ext:custom-validation ValidateMtuForPOMemberCount;
-                }
-                
-                leaf static {
-                    type boolean;
-                    default false;
-                    sonic-ext:custom-validation ValidateModeForPortChannel;
                 }
 
                 leaf min_links {
-                    type uint8 {
-                        range "1..32" {
-                            error-message "Invalid Min-links value, valid range 1 to 32";
-                            error-app-tag min-links-invalid;
-                        }
+                    type uint16 {
+                        range 1..1024;
                     }
                 }
 
-                leaf fallback {
-                    type boolean;
-                    must "((../static = 'false') and (current() = 'false')) or " +
-                         "((../static = 'false') and (current() = 'true')) or " +
-                         "((../static = 'true') and (current() = 'false'))"
-                    {
-                        error-message "Fallback configuration is not applicable for Static LAGs";
-                        error-app-tag fallback-config;
-                    }
-                    sonic-ext:custom-validation ValidatePortChannelFallback;
-                }
+               leaf mode {
+                   description "PortChannel SwitchPort Mode possible values are routed|access|trunk. Default value for mode is routed.";
+                   type stypes:switchport_mode;
 
-                leaf fast_rate {
-                    type boolean;
-                    must "((../static = 'false') and (current() = 'false')) or " +
-                         "((../static = 'false') and (current() = 'true')) or " +
-                         "((../static = 'true') and (current() = 'false'))"
-                    {
-                        error-message "Fast Rate interval configuration is not applicable for Static LAGs";
-                        error-app-tag fast-rate-config;
-                    }
-                }
-
-                leaf graceful_shutdown_mode {
-                    type enumeration {
-                        enum ENABLE;
-                        enum DISABLE;
-                    }
-                    description
-                        "Enable/Disable graceful shutdown mode per portchannel";
-                }
-
-                leaf system_mac {
-                    type yang:mac-address;
-                    description
-                        "System mac for PortChannel";
-                    sonic-ext:custom-validation ValidatePortChannelSystemMac;
-                 }
-
-                leaf lacp_individual {
-                    type mode;
-                    must "((../static = 'false') and (current() = 'disable')) or " +
-                         "((../static = 'false') and (current() = 'enable')) or " +
-                         "((../static = 'true') and (current() = 'disable'))"
-                    {
-                        error-message "LACP individual configuration is not applicable for Static LAGs";
-                        error-app-tag lacp-individual-config;
-                    }
-                    description
-                        "Enable/Disable LACP Individual";
-                    sonic-ext:custom-validation ValidatePortChannelLacpIndividual;
-                }
-
-                leaf lacp_individual_timeout {
-                    type uint8;
-                    description
-                        "Configured Individual timeout";
                 }
 
                 leaf description {
-                    type string;
-                    description
-                        "Decription of the portchannel";
-                }
-		leaf-list tagged_vlans{
-		    type string;
-		    description
-			"List of tagged VLANs to be associated with portchannel";
-                    sonic-ext:custom-validation ValidateL2PTCoppExclVlanTaggdExists;
-		}
-		leaf access_vlan{
-		    type string;
-		    description
-			"Access VLAN to be associated with portchannel";
-                    sonic-ext:custom-validation ValidateL2PTCoppExclVlanAccessExists;
-		}
-                leaf dhcpv4_snooping_trust {
-                      type scommon:mode-enable;
-                }
-                leaf dhcpv6_snooping_trust {
-                      type scommon:mode-enable;
-                }
-            }
-        }
-
-        container PORTCHANNEL_MEMBER {
-
-            list PORTCHANNEL_MEMBER_LIST {
-                key "name ifname";
-                sonic-ext:custom-validation ValidateVlanMapIntf;
-                sonic-ext:custom-validation ValidateL2ConfigExists;
-                sonic-ext:custom-validation ValidateL3ConfigExists;
-                sonic-ext:custom-validation ValidateMtuForPOMemberCount;
-                sonic-ext:custom-validation ValidatePortChannelPacIntf;
-                sonic-ext:custom-validation ValidatePortChannelQosMap;
-                sonic-ext:custom-validation ValidateL2PTCoppExclExists;
-
-                leaf name {
-                    type leafref {
-                        path "../../../PORTCHANNEL/PORTCHANNEL_LIST/name";
+                    type string {
+                        length 1..255;
                     }
-                }
-
-                leaf ifname {
-                    type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
-                    }
-                }
-            }
-        }
-
-        container LAG_TABLE {
-            config false;
-
-            list LAG_TABLE_LIST {
-                key "lagname";
-
-                leaf lagname {
-                    type string;
-                }
-
-                leaf admin_status {
-                    type scommon:admin-status;
                 }
 
                 leaf mtu {
-                    type uint32 {
-                        range "1312..9216" {
-                            error-message "Invalid MTU value";
-                            error-app-tag mtu-invalid;
+                    type uint16 {
+                        range 1..9216;
+                    }
+                }
+
+                leaf admin_status {
+                    mandatory true;
+                    type stypes:admin_status;
+                }
+
+                leaf lacp_key {
+                    /* lacp key should be either auto or a integer in the range of 1 to 65535 */
+                    /* When lacp_key is set to 'auto' the lacp key would be set to be the number */
+                    /* on the end of the PortChannel name with a prefix of 1 */
+                    type union {
+                        type string {
+                            pattern "auto";
+                        }
+                        type uint16 {
+                            range 1..65535;
                         }
                     }
                 }
 
-                leaf active {
-                    type boolean;
+                leaf tpid {
+                    description "This leaf describes the possible TPID value that can be configured
+                                to the specified portchannel if the HW supports TPID configuration. The possible
+                                values are 0x8100, 0x9100, 0x9200, 0x88a8, and 0x88A8";
+                    type stypes:tpid_type;
                 }
 
-                leaf name {
-                    type string;
+                leaf fallback {
+                    description "Enable LACP fallback feature";
+                    type stypes:boolean_type;
+                }
+                leaf fast_rate {
+                    description "Enable LACP fast rate";
+                    type stypes:boolean_type;
                 }
 
-                leaf oper_status {
-                    type scommon:oper-status;
-                }
+            } /* end of list PORTCHANNEL_LIST */
 
-                leaf reason {
-                    type scommon:down-reason;
-                }
+        } /* end of container PORTCHANNEL */
 
-                //control to disable traffic collection and distribution for all LAG member ports
-                leaf traffic_disable {
-                    type boolean; 
-                }
+        container PORTCHANNEL_MEMBER {
 
-                leaf fallback_operational {
-                    type boolean;
-                }
-                leaf speed {
-                    type uint64;
-                }
-                leaf port_load_interval {
-                    type uint16;
-                }
-                leaf description {
-                    type string;
-                }
+            description "PORTCHANNEL_MEMBER part of config_db.json";
 
-            }
-        }
+            list PORTCHANNEL_MEMBER_LIST {
 
-        container LAG_MEMBER_TABLE {
-            config false;
-
-            list LAG_MEMBER_TABLE_LIST {
-                key "name ifname";
+                key "name port";
 
                 leaf name {
                     type leafref {
-                        path "../../../LAG_TABLE/LAG_TABLE_LIST/lagname";
+                        path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
                     }
                 }
 
-                leaf ifname {
+                leaf port {
+                    /* key elements are mandatory by default */
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path /port:sonic-port/port:PORT/port:PORT_LIST/port:name;
                     }
                 }
-                leaf status {
-                    type string;
-                    description
-                        "status of the portchannel member";
-                }
-            }
-        }
+            } /* end of list PORTCHANNEL_MEMBER_LIST */
 
-        container LAG_MEMBER_INDIVIDUAL_TABLE {
-            config false;
-            sonic-ext:db-name "STATE_DB";
-            sonic-ext:key-delim "|"; 
-            description "state db table to show active lacp individual LAG member";
+        } /* end of container PORTCHANNEL_MEMBER */
 
-            list LAG_MEMBER_INDIVIDUAL_TABLE_LIST {
-                key "name ifname";
+        container PORTCHANNEL_INTERFACE {
+
+            description "PORTCHANNEL_INTERFACE part of config_db.json";
+
+            list PORTCHANNEL_INTERFACE_LIST {
+                key "name";
 
                 leaf name {
-                    type string;
-
-                }
-                leaf ifname {
-                    type string;
-                }
-                leaf lacp_individual {
-                    type enumeration {
-                        enum active;
-                        enum inactive;
+                    /* key elements are mandatory by default */
+                    type leafref {
+                        path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
                     }
                 }
-            }
-        }
-    }
-}
+
+                leaf vrf_name {
+                    type leafref {
+                        path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:name";
+                    }
+                }
+
+                leaf loopback_action {
+                    description "Packet action when a packet ingress and gets routed on the same IP interface";
+                    type stypes:loopback_action;
+                }
+
+		leaf nat_zone {
+		    description "NAT Zone for the portchannel interface";
+		    type uint8 {
+		        range "0..3" {
+			    error-message "Invalid nat zone for the portchannel interface.";
+			    error-app-tag nat-zone-invalid;
+			}
+		    }
+		    default "0";
+		}
+		leaf mpls {
+			description "Enable/disable MPLS routing for the portchannel interface";
+                        type enumeration {
+				enum enable;
+				enum disable;
+			}
+		}
+
+		leaf ipv6_use_link_local_only {
+			description "Enable/Disable IPv6 link local address on portchannel interface";
+			type stypes:mode-status;
+			default disable;
+		}
+
+                leaf mac_addr {
+                    description "Assign administrator-provided MAC address to Interface";
+                    type yang:mac-address;
+                }
+
+            } /* end of list PORTCHANNEL_INTERFACE_LIST */
+
+            list PORTCHANNEL_INTERFACE_IPPREFIX_LIST {
+
+                key "name ip_prefix";
+
+                leaf name {
+                    /* key elements are mandatory by default */
+                    type leafref {
+                        path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
+                    }
+                }
+
+                leaf ip_prefix {
+                    /* key elements are mandatory by default */
+                    type stypes:sonic-ip-prefix;
+                }
+            } /* end of list PORTCHANNEL_INTERFACE_IPPREFIX_LIST */
+
+        } /* end of container PORTCHANNEL_INTERFACE */
+
+    } /* end of container sonic-portchannel */
+
+} /* end of module sonic-portchannel */

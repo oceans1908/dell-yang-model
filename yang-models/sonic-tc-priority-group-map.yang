@@ -1,60 +1,67 @@
 module sonic-tc-priority-group-map {
-	namespace "http://github.com/Azure/sonic-tc-priority-group-map";
-	prefix tpg;
 
-	import sonic-extension {
-		prefix sonic-ext;
-	}
-	organization
-		"SONiC";
+    yang-version 1.1;
 
-	contact
-		"SONiC";
+    namespace "http://github.com/sonic-net/sonic-tc-priority-group-map";
 
-	description
-		"SONIC TC_TO_PRIORITY_GROUP_MAP";
+    prefix tpgm;
 
-	revision 2019-05-15 {
-		description
-			"Initial revision.";
-	}
+    import sonic-types {
+        prefix stypes;
+    }
 
-	container sonic-tc-priority-group-map {
+    organization
+        "SONiC";
 
-		container TC_TO_PRIORITY_GROUP_MAP {
+    contact
+        "SONiC";
 
-			list TC_TO_PRIORITY_GROUP_MAP_LIST {
-				key "name";
-                                
-				leaf name {
-					type string {
-						pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,31})';
-                				length 1..32;
-        				}
-				}
+    description
+        "TC_TO_PRIORITY_GROUP_MAP yang Module for SONiC OS";
 
-				list TC_TO_PRIORITY_GROUP_MAP { //this is list inside list for storing mapping between two fields
-					key "tc_num";
+    revision 2021-04-15 {
+        description
+            "Initial revision.";
+    }
 
-					leaf tc_num {
-						type string {
-							pattern "[0-7]?"{
-								error-message "Invalid Traffic Class number";
-								error-app-tag tc-num-invalid;
-							}
-						}
-					}
+    container sonic-tc-priority-group-map {
 
-					leaf pg_num {
-						type string {
-							pattern "[0-7]?"{
-								error-message "Invalid Priority Group number";
-								error-app-tag pg-num-invalid;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+        container TC_TO_PRIORITY_GROUP_MAP {
+
+            description "TC_TO_PRIORITY_GROUP_MAP part of config_db.json";
+
+            list TC_TO_PRIORITY_GROUP_MAP_LIST {
+
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,31})';
+                        length 1..32 {
+                            error-message "Invalid length for map name.";
+                            error-app-tag map-name-invalid-length;
+                        }
+                    }
+                }
+
+                list TC_TO_PRIORITY_GROUP_MAP { //this is list inside list for storing mapping between two fields
+
+                    key "tc";
+
+                    leaf tc {
+                        type stypes:tc_type;
+                    }
+
+                    leaf pg {
+                        type string {
+                            pattern "[0-7]?" {
+                                error-message "Invalid Priority Group";
+                                error-app-tag pg-invalid;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

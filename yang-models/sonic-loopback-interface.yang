@@ -1,60 +1,27 @@
 module sonic-loopback-interface {
-    namespace "http://github.com/Azure/sonic-loopback-interface";
-    prefix sonic-lo-if;
+
     yang-version 1.1;
 
-    import ietf-inet-types {
-        prefix inet;
+    namespace "http://github.com/sonic-net/sonic-loopback-interface";
+    prefix lointf;
+
+    import sonic-types {
+        prefix stypes;
     }
 
     import sonic-vrf {
         prefix vrf;
     }
 
-    import sonic-common {
-        prefix cmn;
-    }
-
-    import sonic-loopback {
-        prefix lp;
-    }
-
-    import sonic-extension {
-        prefix sonic-ext;
-    }
-
-    organization
-        "SONiC";
-
-    contact
-        "SONiC";
-
     description
         "SONIC LOOPBACK INTERFACE";
 
-    revision 2022-12-21 {
-        description
-            "Add custom validation for vrf_name.";
+    revision 2021-04-05 {
+        description "Modify the type of vrf name";
     }
 
-    revision 2020-07-26 {
-        description
-            "Move L2 Loopback to a separate Yang model.";
-    }
-
-    revision 2020-02-15 {
-            description
-                        "Add ipv6_use_link_local_only attribute to interface object";
-    }
-
-    revision 2019-12-01 {
-        description
-            "Add vrf_name for VRF interface binding.";
-    }
-
-    revision 2019-07-02 {
-        description
-            "Initial revision.";
+    revision 2020-02-05 {
+        description "First Revision";
     }
 
     container sonic-loopback-interface {
@@ -62,67 +29,76 @@ module sonic-loopback-interface {
         container LOOPBACK_INTERFACE {
 
             list LOOPBACK_INTERFACE_LIST {
-                key "loIfName";
+                key "name";
 
-                leaf loIfName {
+                leaf name{
+                    type stypes:interface_name;
+                }
+
+                leaf vrf_name {
                     type leafref {
-                        path "/lp:sonic-loopback/lp:LOOPBACK/lp:LOOPBACK_LIST/lp:name";        
+                        path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:name";
                     }
                 }
 
                 leaf nat_zone {
+                    description "NAT Zone for the loopback interface";
                     type uint8 {
-                        range "0..3";
-                    }
-                }
-
-                leaf vrf_name {
-                    type union {
-                        type string {
-                            pattern "mgmt";
-                        }
-                        type leafref {
-                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
+                        range "0..3" {
+                            error-message "Invalid nat zone for the loopback interface.";
+                            error-app-tag nat-zone-invalid;
                         }
                     }
-                    sonic-ext:custom-validation ValidateDonorUnnumIntfVrf;
-                    sonic-ext:custom-validation ValidateIntfVrfBinding;
+                    default "0";
                 }
 
-                leaf ipv6_autoconfig {
-                    type cmn:mode-enable;
-                    default disable;
-                    description
-                        "Enable IPv6 stateless auto-configuration on interface";
-                }
-
-                leaf ipv6_use_link_local_only {
-                    type cmn:mode-enable;
-                    default disable;
-                    description
-                        "Enable IPv6 link local address on interface";
+                leaf admin_status {
+                    type stypes:admin_status;
+                    default up;
                 }
             }
+            /* end of LOOPBACK_INTERFACE_LIST */
 
-            list LOOPBACK_INTERFACE_IPADDR_LIST {
-                key "loIfName ip_prefix";
+            list LOOPBACK_INTERFACE_IPPREFIX_LIST {
 
-                leaf loIfName{
-                     type leafref {
-                        path "../../LOOPBACK_INTERFACE_LIST/loIfName";
+                key "name ip-prefix";
+
+                leaf name{
+                    description "Loopback interface name";
+
+                    type leafref {
+                        path "../../LOOPBACK_INTERFACE_LIST/name";
                     }
                 }
 
-                leaf ip_prefix {
-                    type inet:ip-prefix;
-                    sonic-ext:custom-validation ValidateIntfIp;
-
+                leaf ip-prefix {
+                    type union {
+                        type stypes:sonic-ip4-prefix;
+                        type stypes:sonic-ip6-prefix;
+                    }
                 }
-                leaf secondary {
-                    type boolean;
-                    sonic-ext:custom-validation ValidateDonorIntfMultiIP;
+
+                leaf scope {
+                    type enumeration {
+                        enum global;
+                        enum local;
+                    }
+                }
+
+                leaf family {
+
+                    /* family leaf needed for backward compatibility
+                       Both ip4 and ip6 address are string in IETF RFC 6021,
+                       so must statement can check based on : or ., family
+                       should be IPv4 or IPv6 according.
+                     */
+
+                    must "(contains(../ip-prefix, ':') and current()='IPv6') or
+                        (contains(../ip-prefix, '.') and current()='IPv4')";
+                    type stypes:ip-family;
                 }
             }
         }
+        /* end of LOOPBACK_INTERFACE_IPPREFIX_LIST */
     }
 }

@@ -1,62 +1,68 @@
 module sonic-pfc-priority-priority-group-map {
-	namespace "http://github.com/Azure/sonic-pfc-priority-priority-group-map";
-	prefix pppg;
-	import sonic-extension {
-        	prefix sonic-ext;
-	}
 
-	organization
-		"SONiC";
+    yang-version 1.1;
 
-	contact
-		"SONiC";
+    namespace "http://github.com/sonic-net/sonic-pfc-priority-priority-group-map";
 
-	description
-		"SONIC PFC_PRIORITY_TO_PRIORITY_GROUP_MAP";
+    prefix pppgm;
 
-	revision 2023-12-12 {
-		description
-			"Initial revision.";
-	}
+    organization
+        "SONiC";
 
-	container sonic-pfc-priority-priority-group-map {	
+    contact
+        "SONiC";
 
-		container PFC_PRIORITY_TO_PRIORITY_GROUP_MAP {
+    description
+        "PFC_PRIORITY_TO_PRIORITY_GROUP_MAP yang Module for SONiC OS";
 
-			list PFC_PRIORITY_TO_PRIORITY_GROUP_MAP_LIST {
-				key "name";
-				sonic-ext:custom-validation ValidatePfcPriorityToPriorityGroupMapLimits;
-				sonic-ext:custom-validation ValidatePfcPriorityToPriorityGroupMapSupport;
+    revision 2021-04-15 {
+        description
+            "Initial revision.";
+    }
 
-				leaf name {
-                        		type string {
-                        			pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,31})';
-                                		length 1..32;
-                        		}
-				}
+    container sonic-pfc-priority-priority-group-map {
 
-				list PFC_PRIORITY_TO_PRIORITY_GROUP_MAP { //this is list inside list for storing mapping between two fields
-					key "pfc_priority";
+        container PFC_PRIORITY_TO_PRIORITY_GROUP_MAP {
 
-					leaf pfc_priority {
-						type string {
-							pattern "[0-7]?"{
-								error-message "Invalid PFC Priority";
-								error-app-tag pfc-priority-invalid;
-							}
-						}
-					}
-                                        leaf pg_num {
-						type string {
-							pattern "[0-7]?"{
-								error-message "Invalid Priority Group number";
-								error-app-tag pg-num-invalid;
-							}
-						}
-					}
-				}
+            description "PFC_PRIORITY_TO_PRIORITY_GROUP_MAP part of config_db.json";
 
-			}
-		}
-	}
+            list PFC_PRIORITY_TO_PRIORITY_GROUP_MAP_LIST {
+
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,31})';
+                        length 1..32 {
+                            error-message "Invalid length for map name.";
+                            error-app-tag map-name-invalid-length;
+                        }
+                    }
+                }
+
+                list PFC_PRIORITY_TO_PRIORITY_GROUP_MAP { //this is list inside list for storing mapping between two fields
+
+                    key "pfc_priority";
+
+                    leaf pfc_priority {
+                        type string {
+                            pattern "[0-7]?" {
+                               error-message "Invalid pfc priority";
+                               error-app-tag pfc-priority-invalid;
+                            }
+                        }
+                    }
+
+                    leaf pg {
+                        type string {
+                            pattern "[0-7]?" {
+                                error-message "Invalid Priority Group";
+                                error-app-tag pg-invalid;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

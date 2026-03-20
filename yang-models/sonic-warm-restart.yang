@@ -1,21 +1,14 @@
-module sonic-warm-restart {
-    namespace "http://github.com/Azure/sonic-warm-restart";
-    prefix wrm;
+module sonic-warm-restart  {
 
     yang-version 1.1;
 
-    organization
-        "SONiC";
+    namespace "http://github.com/sonic-net/sonic-warm-restart";
+    prefix wrm;
 
-    contact
-        "SONiC";
+    description "SONIC WARMRESTART";
 
-    description
-        "SONIC WARMRESTART";
-
-    revision 2020-06-25 {
-        description
-            "Initial revision.";
+    revision 2021-05-24 {
+        description "First Revision";
     }
 
     typedef module-name {
@@ -39,7 +32,7 @@ module sonic-warm-restart {
 
             enum system {
                description
-                 "system level enable/disable warm-restart";
+                 "Warm Restart on a System level.";
             }
 
         }
@@ -48,57 +41,11 @@ module sonic-warm-restart {
             "The modules supported in warm-restart";
     }
 
+
     container sonic-warm-restart {
-
-        container WARM_RESTART_TABLE {
-        config  false;
-
-            list WARM_RESTART_TABLE_LIST {
-                key "submodule";
-             
-                leaf submodule {
-                    type string;
-                    description
-                      "Submodule names to get data";
-          
-                }
-
-                leaf restore_count {
-                    type uint16;
-                    description
-                      "Restore count value";
-                }
-
-                leaf state {
-                    type string; 
-                    description
-                      "Warm-reboot state of submodule.";
-                }
-            }
-        }
-
-        container WARM_RESTART_ENABLE {
-
-             list WARM_RESTART_ENABLE_LIST {
-                key "module";
-
-                leaf module {
-                    type module-name;
-                    description
-                       "Name of the module";
-                }
-
-                leaf enable {
-                    type boolean;
-                    description
-                       "Enable/Disable a module";
-                }
-            }
-        }
-
         container WARM_RESTART {
 
-             list WARM_RESTART_LIST {
+            list WARM_RESTART_LIST {
                 key "module";
 
                 leaf module {
@@ -111,7 +58,7 @@ module sonic-warm-restart {
                     type boolean;
                     must "current()/../module = 'bgp'" { error-message "bgp_eoiu is only supported for module bgp."; }
                     description
-                       "BGP EOIU enable/disable";
+                       "BGP End-of-Initial Update (EOIU) signal enable/disable";
                 }
 
                 leaf bgp_timer {
@@ -128,8 +75,8 @@ module sonic-warm-restart {
 
                 leaf teamsyncd_timer {
                     type uint16 {
-                        range "1..9999" {
-                            error-message "Timer must be 1..9999";
+                        range "1..3600" {
+                            error-message "Timer must be 1..3600";
                             error-app-tag timer-invalid;
                         }
                     }
@@ -150,8 +97,9 @@ module sonic-warm-restart {
                        "Timer value for swss module";
                 }
 
-            }
-        }
-    }
-}
+            } /* end of list WARM_RESTART_LIST */
+        } /* end of container WARM_RESTART */
+    } /* end of container sonic-warm-restart */
 
+
+} /* end of module sonic-warm-restart */

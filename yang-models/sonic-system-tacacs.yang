@@ -1,5 +1,5 @@
 module sonic-system-tacacs {
-    namespace "http://github.com/Azure/sonic-system-tacacs";
+    namespace "http://github.com/sonic-net/sonic-system-tacacs";
     prefix ssys;
     yang-version 1.1;
 
@@ -8,63 +8,28 @@ module sonic-system-tacacs {
     }
 
     import sonic-port {
-        prefix prt;
+        prefix port;
     }
 
     import sonic-portchannel {
-        prefix spc;
+        prefix lag;
     }
 
+    /*
     import sonic-vlan {
-        prefix svlan;
+        prefix vlan;
+    }
+    */
+
+    import sonic-loopback-interface {
+        prefix loopback;
     }
 
-    import sonic-loopback {
-        prefix lo;
+    import sonic-mgmt_port {
+        prefix mgmt-port;
     }
 
-    import sonic-interface {
-        prefix sintf;
-    }
-
-    import sonic-mgmt-port {
-        prefix smt;
-    }
-
-    import sonic-extension {
-        prefix sonic-ext;
-    }
-
-    organization
-        "SONiC";
-
-    contact
-        "SONiC";
-
-    description
-        "SONiC System TACACS";
-
-    revision 2022-12-06 {
-        description "Added cvl custom validation for TACAC+ server vrf configuration.";
-    }
-
-    revision 2021-01-08 {
-        description "Added support for routed vlan-sub-interface.";
-    }
-
-    revision 2020-07-26 {
-        description "Change for sonic-loopback.yang.";
-    }
-
-    revision 2020-05-02 {
-        description "Allowed domain name as well for server configuration.";
-    }
-
-    revision 2020-02-17 {
-        description "Allow special characters in passkey.";
-    }
-
-    revision 2019-11-13 {
+    revision 2021-04-15 {
         description "Initial revision.";
     }
 
@@ -77,6 +42,12 @@ module sonic-system-tacacs {
         }
     }
 
+    typedef key_encrypt_type {
+        type boolean;
+        default false;
+        description "Indicates if the passkey is encrypted.";
+    }
+
     container sonic-system-tacacs {
 
         container TACPLUS_SERVER {
@@ -86,9 +57,8 @@ module sonic-system-tacacs {
 
                 leaf ipaddress {
                     type inet:host;
-                    sonic-ext:custom-validation ValidateIPAddressOrHostname;
                     description
-                    "TACACS+ server's Domain name or IP address (IPv4 or IPv6)";
+                        "TACACS+ server's Domain name or IP address (IPv4 or IPv6)";
                 }
 
                 leaf priority {
@@ -98,11 +68,13 @@ module sonic-system-tacacs {
                             error-message "TACACS server priority must be 1..64";
                         }
                     }
+                    description "Server priority";
                 }
 
                 leaf tcp_port {
                     type inet:port-number;
                     default 49;
+                    description "TCP port to communite with TACACS+ server";
                 }
 
                 leaf timeout {
@@ -112,16 +84,26 @@ module sonic-system-tacacs {
                             error-message "TACACS server timeout must be 1..60";
                         }
                     }
+                    description "TACACS+ server timeout";
                 }
 
                 leaf auth_type {
                     type auth_type_enumeration;
                     default pap;
+                    description "Authentication type";
+                }
+
+                leaf key_encrypt {
+                    type key_encrypt_type;
                 }
 
                 leaf passkey {
-                    sonic-ext:custom-validation ValidateEncryptedKey;
-                    type string;
+                    type string {
+                        length "1..256";
+                        pattern "[^ #,]*" {
+                            error-message 'TACACS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
                 }
 
                 leaf vrf {
@@ -130,25 +112,15 @@ module sonic-system-tacacs {
                             error-message "Error: Invalid VRF name";
                         }
                     }
-
-                    sonic-ext:custom-validation ValidateMgmtVrfConfigured;
                     description
-                        "Internal management vrf name for SONiC";
+                        "VRF name";
                 }
             }
         }
 
-
         container TACPLUS {
-            list TACPLUS_LIST {
 
-                key "type";
-
-                leaf type {
-                    type enumeration {
-                        enum global;
-                    }
-                }
+            container global {
 
                 leaf auth_type {
                     type auth_type_enumeration;
@@ -164,36 +136,46 @@ module sonic-system-tacacs {
                     default 5;
                 }
 
+                leaf key_encrypt {
+                    type key_encrypt_type;
+                }
+
                 leaf passkey {
-                    sonic-ext:custom-validation ValidateEncryptedKey;
-                    type string;
+                    type string {
+                        length "1..256";
+                        pattern "[^ #,]*" {
+                            error-message 'TACACS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
+                    description "Shared secret used for encrypting the communication";
                 }
 
                 leaf src_intf {
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/port:sonic-port/port:PORT/port:PORT_LIST/port:name";
                         }
                         type leafref {
-                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                            path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
+                        }
+                        /*
+                        type leafref {
+                            path "/vlan:sonic-vlan/vlan:VLAN/vlan:VLAN_LIST/vlan:name";
+                        }
+                        */
+                        type string {
+                            pattern 'Vlan([0-9]{1,3}|[1-3][0-9]{3}|[4][0][0-8][0-9]|[4][0][9][0-4])';
                         }
                         type leafref {
-                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                            path "/loopback:sonic-loopback-interface/loopback:LOOPBACK_INTERFACE/loopback:LOOPBACK_INTERFACE_LIST/loopback:name";
                         }
                         type leafref {
-                            path "/lo:sonic-loopback/lo:LOOPBACK/lo:LOOPBACK_LIST/lo:name";
-                        }
-                        type leafref {
-                            path "/smt:sonic-mgmt-port/smt:MGMT_PORT/smt:MGMT_PORT_LIST/smt:ifname";
-                        }
-                        type leafref {
-                            path "/sintf:sonic-interface/sintf:VLAN_SUB_INTERFACE/sintf:VLAN_SUB_INTERFACE_LIST/sintf:id";
+                            path "/mgmt-port:sonic-mgmt_port/mgmt-port:MGMT_PORT/mgmt-port:MGMT_PORT_LIST/mgmt-port:name";
                         }
                     }
+                    description "Source IP to use from source interface for TACACS+ server communication.";
                 }
             }
         }
     }
 }
-
-
