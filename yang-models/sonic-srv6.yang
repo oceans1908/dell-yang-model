@@ -68,7 +68,7 @@ module sonic-srv6 {
                 leaf vrf {
                     type union {
                         type leafref {
-                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:name";
+                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
                         }
                         type string {
                             pattern 'default';
@@ -105,7 +105,7 @@ module sonic-srv6 {
                 leaf decap_vrf {
                     type union {
                         type leafref {
-                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:name";
+                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
                         }
                         type string {
                             pattern 'default';

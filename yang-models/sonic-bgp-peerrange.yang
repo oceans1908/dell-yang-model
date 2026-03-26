@@ -42,7 +42,7 @@ module sonic-bgp-peerrange {
                 leaf vrf_name {
                     type union {
                         type leafref {
-                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:name";
+                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
                         }
                         type leafref {
                             path "/svnet:sonic-vnet/svnet:VNET/svnet:VNET_LIST/svnet:name";

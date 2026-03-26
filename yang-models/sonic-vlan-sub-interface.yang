@@ -78,7 +78,7 @@ module sonic-vlan-sub-interface {
 
                 leaf vrf_name {
                     type leafref {
-                        path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:name";
+                        path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
                     }
                 }
 
