@@ -491,7 +491,7 @@ module sonic-ars {
 
         leaf name {
           type leafref {
-            path "/sonic-prt:sonic-port/sonic-prt:PORT/sonic-prt:PORT_LIST/sonic-prt:ifname";
+            path "/sonic-prt:sonic-port/sonic-prt:PORT/sonic-prt:PORT_LIST/sonic-prt:name";
           }
           description
             "Port Name";

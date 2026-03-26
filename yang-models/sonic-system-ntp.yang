@@ -109,7 +109,7 @@ module sonic-system-ntp {
                 leaf-list src_intf {
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                         }
                         type leafref {
                             path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
@@ -121,7 +121,7 @@ module sonic-system-ntp {
                             path "/lo:sonic-loopback/lo:LOOPBACK/lo:LOOPBACK_LIST/lo:name";
                         }
                         type leafref {
-                            path "/smt:sonic-mgmt-port/smt:MGMT_PORT/smt:MGMT_PORT_LIST/smt:ifname";
+                            path "/smt:sonic-mgmt-port/smt:MGMT_PORT/smt:MGMT_PORT_LIST/smt:name";
                         }
                         type leafref {
                             path "/sintf:sonic-interface/sintf:VLAN_SUB_INTERFACE/sintf:VLAN_SUB_INTERFACE_LIST/sintf:id";

@@ -1303,7 +1303,7 @@ module sonic-flow-based-services {
                 leaf INTERFACE_NAME {
                     type union {
                         type leafref {
-                            path "/sprt:sonic-port/sprt:PORT/sprt:PORT_LIST/sprt:ifname";
+                            path "/sprt:sonic-port/sprt:PORT/sprt:PORT_LIST/sprt:name";
                         }
                         type leafref {
                             path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";

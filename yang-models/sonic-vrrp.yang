@@ -170,7 +170,7 @@ module sonic-vrrp {
                 leaf trackifname {
                     type union {
                         type leafref {
-                            path "/sprt:sonic-port/sprt:PORT/sprt:PORT_LIST/sprt:ifname";
+                            path "/sprt:sonic-port/sprt:PORT/sprt:PORT_LIST/sprt:name";
                         }
                         type leafref {
                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
@@ -292,7 +292,7 @@ module sonic-vrrp {
                 leaf trackifname {
                     type union {
                         type leafref {
-                            path "/sprt:sonic-port/sprt:PORT/sprt:PORT_LIST/sprt:ifname";
+                            path "/sprt:sonic-port/sprt:PORT/sprt:PORT_LIST/sprt:name";
                         }
                         type leafref {
                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";

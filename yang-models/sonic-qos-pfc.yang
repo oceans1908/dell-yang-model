@@ -63,7 +63,7 @@ module sonic-qos-pfc {
         leaf ifname {
             type union {
                  type leafref {
-                      path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                      path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                  }
                  type string {
                      pattern "GLOBAL";

@@ -131,7 +131,7 @@ module sonic-system-logging {
                 leaf src_intf {
                     type union {
                         type leafref {
-                            path "/sport:sonic-port/sport:PORT/sport:PORT_LIST/sport:ifname";
+                            path "/sport:sonic-port/sport:PORT/sport:PORT_LIST/sport:name";
                         }
                         type leafref {
                             path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";

@@ -82,7 +82,7 @@ module sonic-frr-nd {
                 pattern "null";
             }
             type leafref {
-                path "/sonic-prt:sonic-port/sonic-prt:PORT/sonic-prt:PORT_LIST/sonic-prt:ifname";
+                path "/sonic-prt:sonic-port/sonic-prt:PORT/sonic-prt:PORT_LIST/sonic-prt:name";
             }
             type leafref {
                 path "/sonic-pch:sonic-portchannel/sonic-pch:PORTCHANNEL/sonic-pch:PORTCHANNEL_LIST/sonic-pch:name";

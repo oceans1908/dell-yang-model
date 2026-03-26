@@ -48,7 +48,7 @@ module sonic-authmgr {
 
 		leaf port {
 		   type leafref {
-			path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+			path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
 		   }
                    description
 			"Name of the interface on which port control mode get applied.";
@@ -460,7 +460,7 @@ module sonic-authmgr {
 
                 leaf port {
                    type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                    }
                    description
                         "Name of the interface on which PAC port config get applied.";
@@ -660,7 +660,7 @@ module sonic-authmgr {
 
                 leaf port {
                    type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                    }
                    description
                         "Name of the interface on which PAC port config get applied.";
@@ -726,7 +726,7 @@ module sonic-authmgr {
 
                 leaf port {
                    type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                    }
                    description
                         "Interface reference to PAC operation port.";

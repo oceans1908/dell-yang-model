@@ -76,7 +76,7 @@ module sonic-bfd {
                                         pattern "null";
                                 }
                                 type leafref {
-                                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                                 }
 				type leafref {
 					path "/sint:sonic-interface/sint:VLAN_SUB_INTERFACE/sint:VLAN_SUB_INTERFACE_LIST/sint:id";

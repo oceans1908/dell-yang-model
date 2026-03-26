@@ -64,7 +64,7 @@ module sonic-qos-clear {
                    leaf interface {
                        type union {
                            type leafref {
-                               path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                               path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                            }
                            type string {
                                pattern "CPU";
@@ -147,7 +147,7 @@ module sonic-qos-clear {
                     leaf interface {
                         type union {
                             type leafref {
-                                path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                                path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                             }
                             type string {
                                 pattern "CPU";

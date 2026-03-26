@@ -133,7 +133,7 @@ module sonic-errdisable {
                 key "name";
         		leaf name {
             		type leafref {
-                		path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                		path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
             		}
         		}
 

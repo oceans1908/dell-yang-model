@@ -13,7 +13,7 @@ module sonic-mgmt-port-annot {
             sonic-ext:db-name "APPL_DB";
         }
     }
-    deviation /mgmt:sonic-mgmt-port/mgmt:MGMT_PORT/mgmt:MGMT_PORT_LIST/mgmt:ifname {
+    deviation /mgmt:sonic-mgmt-port/mgmt:MGMT_PORT/mgmt:MGMT_PORT_LIST/mgmt:name {
         deviate add {
             sonic-ext:value-transformer "alias_value_xfmr";
         }

@@ -52,7 +52,7 @@ module sonic-hostapd {
 
                 leaf port {
                    type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                    }
                    description
                        "Name of the interface on which PAC port config get applied.";
@@ -113,7 +113,7 @@ module sonic-hostapd {
 
                 leaf port {
                    type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                    }
                    description
                         "Physical Port.";
@@ -152,7 +152,7 @@ module sonic-hostapd {
 
                 leaf port {
                    type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                    }
                    description
                         "Name of the interface on which PAC port config get applied.";

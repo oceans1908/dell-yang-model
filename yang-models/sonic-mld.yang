@@ -61,7 +61,7 @@ module sonic-mld {
                 leaf mldintfname{
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                         }
                         type leafref {
                             path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
@@ -101,7 +101,7 @@ module sonic-mld {
                 leaf interface-id{
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                         }
                         type leafref {
                             path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
@@ -221,7 +221,7 @@ module sonic-mld {
         leaf interface {
             type union {
                 type leafref {
-                    path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                 }
                 type leafref {
                     path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";

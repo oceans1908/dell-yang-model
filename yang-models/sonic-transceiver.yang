@@ -33,7 +33,7 @@ module sonic-transceiver {
 
                 leaf ifname {
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                     }
                 }
                 leaf lb_media_input_enabled {
@@ -79,7 +79,7 @@ module sonic-transceiver {
 
                 leaf ifname {
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                     }
                 }
                 leaf type {

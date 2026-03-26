@@ -458,7 +458,7 @@ module sonic-ptp {
 					sonic-ext:custom-validation CheckDpbInProgressForPortConfig;
 					type union {
 						type leafref {
-							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
 						}
 						type leafref {
 							path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
@@ -704,7 +704,7 @@ module sonic-ptp {
 				leaf source-interface {
 					type union {
 						type leafref {
-							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
 						}
 						type leafref {
 							path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";

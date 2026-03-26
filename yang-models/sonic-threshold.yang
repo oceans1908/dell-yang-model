@@ -60,7 +60,7 @@ module sonic-threshold {
                 leaf interface_name {
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                         }
                         type string {
                             pattern "CPU";
@@ -136,7 +136,7 @@ module sonic-threshold {
 
                 leaf interface-name {
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                     }
                     description
                         "Name of the interface for which bufferpool threshold can be configured.";
@@ -233,7 +233,7 @@ module sonic-threshold {
                 leaf port {
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                         }
                         type string {
                             pattern "CPU";

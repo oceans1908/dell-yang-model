@@ -94,7 +94,7 @@ module sonic-udld {
 
                 leaf ifname {
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                     }
                     description
                         "Reference of port on which UDLD to be configured.";
@@ -148,7 +148,7 @@ module sonic-udld {
 
                 leaf ifname {
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                     }
                     description
                         "Reference of port on which UDLD is configured.";
@@ -189,7 +189,7 @@ module sonic-udld {
 
                 leaf ifname {
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                     }
                     description
                         "Reference of local port on which UDLD is configured.";

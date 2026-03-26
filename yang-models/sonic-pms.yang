@@ -83,7 +83,7 @@ module sonic-pms {
                 leaf ifname {
                     type union {
                         type leafref {
-                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                         }
                         type leafref {
                             path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
@@ -106,7 +106,7 @@ module sonic-pms {
 
                 leaf ifname {
                     type leafref {
-                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                     }
                     description
                         "Reference of port on which PMS is configured.";
@@ -157,7 +157,7 @@ module sonic-pms {
             leaf port {
               type union {
                 type leafref {
-                  path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                  path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                 }
                 type leafref {
                   path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";

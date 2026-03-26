@@ -75,7 +75,7 @@ module sonic-dcbx {
 
             leaf ifname {
                 type leafref {
-                    path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                 }
                 description
                     "Reference of port on which dcbx lldp tlv  to be configured.";
@@ -128,7 +128,7 @@ module sonic-dcbx {
 
             leaf ifname {
                 type leafref {
-                    path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:name";
                 }
                 description
                     "Reference of port on which dcbx LLDP tlv is configured.";
